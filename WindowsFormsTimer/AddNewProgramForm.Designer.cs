@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsTimer
 {
-    partial class FormAddProgram
+    partial class AddNewProgramForm
     {
         /// <summary>
         /// Required designer variable.

@@ -13,7 +13,7 @@ namespace WindowsFormsTimer
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FormTimer());
+            Application.Run(new TimerForm());
         }
     }
 }

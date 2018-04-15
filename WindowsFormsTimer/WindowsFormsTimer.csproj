@@ -56,52 +56,52 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FormAboutBox.cs">
+    <Compile Include="AboutBoxForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormAboutBox.Designer.cs">
-      <DependentUpon>FormAboutBox.cs</DependentUpon>
+    <Compile Include="AboutBoxForm.Designer.cs">
+      <DependentUpon>AboutBoxForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormCorrectionConfirm.cs">
+    <Compile Include="CorrectionConfirmForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormCorrectionConfirm.Designer.cs">
-      <DependentUpon>FormCorrectionConfirm.cs</DependentUpon>
+    <Compile Include="CorrectionConfirmForm.Designer.cs">
+      <DependentUpon>CorrectionConfirmForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormCorrectionWarning.cs">
+    <Compile Include="CorrectionWarningForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormCorrectionWarning.Designer.cs">
-      <DependentUpon>FormCorrectionWarning.cs</DependentUpon>
+    <Compile Include="CorrectionWarningForm.Designer.cs">
+      <DependentUpon>CorrectionWarningForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormTimer.cs">
+    <Compile Include="TimerForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormTimer.Designer.cs">
-      <DependentUpon>FormTimer.cs</DependentUpon>
+    <Compile Include="TimerForm.Designer.cs">
+      <DependentUpon>TimerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormAddProgram.cs">
+    <Compile Include="AddNewProgramForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormAddProgram.Designer.cs">
-      <DependentUpon>FormAddProgram.cs</DependentUpon>
+    <Compile Include="AddNewProgramForm.Designer.cs">
+      <DependentUpon>AddNewProgramForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="FormAboutBox.resx">
-      <DependentUpon>FormAboutBox.cs</DependentUpon>
+    <EmbeddedResource Include="AboutBoxForm.resx">
+      <DependentUpon>AboutBoxForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormCorrectionConfirm.resx">
-      <DependentUpon>FormCorrectionConfirm.cs</DependentUpon>
+    <EmbeddedResource Include="CorrectionConfirmForm.resx">
+      <DependentUpon>CorrectionConfirmForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormCorrectionWarning.resx">
-      <DependentUpon>FormCorrectionWarning.cs</DependentUpon>
+    <EmbeddedResource Include="CorrectionWarningForm.resx">
+      <DependentUpon>CorrectionWarningForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormTimer.resx">
-      <DependentUpon>FormTimer.cs</DependentUpon>
+    <EmbeddedResource Include="TimerForm.resx">
+      <DependentUpon>TimerForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormAddProgram.resx">
-      <DependentUpon>FormAddProgram.cs</DependentUpon>
+    <EmbeddedResource Include="AddNewProgramForm.resx">
+      <DependentUpon>AddNewProgramForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

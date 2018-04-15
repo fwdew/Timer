@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsTimer
 {
-  partial class FormAboutBox
+  partial class AboutBoxForm
   {
     /// <summary>
     /// Required designer variable.

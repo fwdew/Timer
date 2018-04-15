@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsTimer
 {
-  partial class FormCorrectionWarning
+  partial class CorrectionWarningForm
   {
     /// <summary>
     /// Required designer variable.
