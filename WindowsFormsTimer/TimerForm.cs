@@ -1,23 +1,22 @@
 ﻿using System;
+using System.IO;
 using System.Windows.Forms;
 using System.Xml;
 using Microsoft.Win32;
 
 namespace WindowsFormsTimer
 {
-   public enum LanguageType
-   {
-      EN,
-      UA
-   }
-
    public partial class TimerForm : Form
    {
-      private const string SETUP_FILE = "setup_timers.xml";
+      const string SETUP_FILE = "setup.xml";
+      const string mainNode = "main";
+      const string programsNode = "programs";
+      const string programNode = "program";
+      const string timeAttr = "time";
+
       private const string TIME_SEPARATOR = ":";
       private static string[] time_separators = { TIME_SEPARATOR };
       private bool correction = false;
-      private LanguageType currentLanguage = LanguageType.EN;
 
       #region Constructors
       public TimerForm()
@@ -40,18 +39,34 @@ namespace WindowsFormsTimer
          buttonCorrectTime.Enabled = false;
 
          CreateMenu();
-
-         TranslateForm();
       }
 
       private void ReadingConfigurationFromXml()
       {
-         // TODO: If not exist just create a new one
-         currentLanguage = GetCurrentLanguageFromXml();
+         if (!File.Exists(SETUP_FILE)) {
+            CreateBlankConfigurationFile();
+         }
          FormingComboBoxListOfPrograms();
       }
 
-      
+      private void CreateBlankConfigurationFile()
+      {
+         /*
+         <?xml version=1.0 encoding=utf-8?>");
+         <language>en</language>
+         <programs></programs>
+         */
+         using (var xmlWriter = XmlWriter.Create(SETUP_FILE)) {
+            xmlWriter.WriteStartDocument();
+            xmlWriter.WriteStartElement(mainNode);
+
+            xmlWriter.WriteStartElement(programsNode);
+            xmlWriter.WriteString("");
+            xmlWriter.WriteEndElement();
+
+            xmlWriter.WriteEndDocument();
+         }
+      }
       #endregion
 
       #region Events
@@ -65,29 +80,6 @@ namespace WindowsFormsTimer
          Stop();
       }
       #endregion
-
-      private void TranslateForm()
-      {
-         CreateMenu();
-         switch (currentLanguage) {
-            case LanguageType.UA:
-               SetUkrainianLanguage();
-               break;
-            case LanguageType.EN:
-            default:
-               SetEnglishLanguage();
-               break;
-         }
-      }
-
-      private void SetEnglishLanguage()
-      {
-         buttonStart.Text = "Start";
-         buttonStop.Text = "Stop";
-         buttonAddNewProgram.Text = "Add new program";
-         buttonCorrectTime.Text = (!correction) ? "Correct time" : "Ok";
-         Text = "Timer";
-      }
 
       private void SetUkrainianLanguage()
       {
@@ -106,11 +98,6 @@ namespace WindowsFormsTimer
             File
                New
                Exit
-            Options
-               Tools
-                  Language
-                     English
-                     Ukrainian
             Help
                About
          */
@@ -119,55 +106,21 @@ namespace WindowsFormsTimer
          var topMenuItemFile = new MenuItem();
          var menuItemNew = new MenuItem();
          var menuItemExit = new MenuItem();
-         var topMenuItemOptions = new MenuItem();
-         var menuItemLanguage = new MenuItem();
-         var menuItemEnglish = new MenuItem();
-         var menuItemUkrainian = new MenuItem();
          var topMenuItemHelp = new MenuItem();
          var menuItemAbout = new MenuItem();
          // TODO:
          var menuItemAbout1 = new MenuItem("someText");
 
-         switch (currentLanguage) {
-            case LanguageType.UA: {
                   topMenuItemFile.Text = "&Файл";
                   menuItemNew.Text = "&Нова";
                   menuItemExit.Text = "В&ихід";
 
-                  topMenuItemOptions.Text = "Нала&штування";
-                  menuItemLanguage.Text = "&Мови";
-                  menuItemEnglish.Text = "English";
-                  menuItemUkrainian.Text = "Українська";
-
                   topMenuItemHelp.Text = "&Допомога";
                   menuItemAbout.Text = "&Про програму";
-                  break;
-               }
-            case LanguageType.EN:
-            default: {
-                  topMenuItemFile.Text = "&File";
-                  menuItemNew.Text = "&New";
-                  menuItemExit.Text = "E&xit";
-
-                  topMenuItemOptions.Text = "&Tools";
-                  menuItemLanguage.Text = "&Language";
-                  menuItemEnglish.Text = "English";
-                  menuItemUkrainian.Text = "Українська";
-
-                  topMenuItemHelp.Text = "&Help";
-                  menuItemAbout.Text = "&About";
-                  break;
-               }
-         }
 
          topMenuItemFile.MenuItems.Add(menuItemNew);
          topMenuItemFile.MenuItems.Add(menuItemExit);
          mainMenu.MenuItems.Add(topMenuItemFile);
-
-         menuItemLanguage.MenuItems.Add(menuItemEnglish);
-         menuItemLanguage.MenuItems.Add(menuItemUkrainian);
-         topMenuItemOptions.MenuItems.Add(menuItemLanguage);
-         mainMenu.MenuItems.Add(topMenuItemOptions);
 
          topMenuItemHelp.MenuItems.Add(menuItemAbout);
          topMenuItemHelp.MenuItems.Add(menuItemAbout1);
@@ -175,8 +128,6 @@ namespace WindowsFormsTimer
 
          menuItemNew.Click += new EventHandler(menuItemNew_Click);
          menuItemExit.Click += new EventHandler(menuItemExit_Click);
-         menuItemEnglish.Click += new EventHandler(menuItemEnglish_Click);
-         menuItemUkrainian.Click += new EventHandler(menuItemUkrainian_Click);
          menuItemAbout.Click += new EventHandler(menuItemAbout_Click);
 
          Menu = mainMenu;
@@ -192,57 +143,17 @@ namespace WindowsFormsTimer
          StopRunningTimer(this, EventArgs.Empty);
          Close();
       }
-      private void menuItemEnglish_Click(object sender, EventArgs e)
-      {
-         currentLanguage = LanguageType.EN;
-         TranslateForm();
-         SetCurrentLanguageToXml();
-      }
-      private void menuItemUkrainian_Click(object sender, EventArgs e)
-      {
-         currentLanguage = LanguageType.UA;
-         TranslateForm();
-         SetCurrentLanguageToXml();
-      }
       private void menuItemAbout_Click(object sender, EventArgs e)
       {
-         new AboutBoxForm(currentLanguage).ShowDialog();
+         new AboutBoxForm().ShowDialog();
       }
       #endregion
 
-      private void StopRunningTimer(object sender, System.EventArgs e)
+      private void StopRunningTimer(object sender, EventArgs e)
       {
          if ((comboBoxListOfPrograms.SelectedItem != null) && !correction) {
             Stop();
          }
-      }
-
-      private LanguageType GetCurrentLanguageFromXml()
-      {
-         var xmlDoc = new XmlDocument();
-         xmlDoc.Load(SETUP_FILE);
-
-         var languageNode = xmlDoc.SelectSingleNode("//main//options//language");
-         var language = languageNode.InnerText.ToLower();
-
-         switch (language) {
-            case "ua":
-               return LanguageType.UA;
-            case "en":
-            default:
-               return LanguageType.EN;
-         }
-      }
-
-      private void SetCurrentLanguageToXml()
-      {
-         var xmlDoc = new XmlDocument();
-         xmlDoc.Load(SETUP_FILE);
-
-         var languageNode = xmlDoc.SelectSingleNode("//main//options//language");
-         languageNode.InnerText = currentLanguage.ToString().ToLower();
-
-         xmlDoc.Save(SETUP_FILE);
       }
 
       // take a list programs from the setup file
@@ -254,7 +165,7 @@ namespace WindowsFormsTimer
          comboBoxListOfPrograms.Items.Clear();
 
          // read data from each node "program" and fill combobox
-         foreach (XmlNode node in xmlDoc.SelectSingleNode("//main//programs").ChildNodes) {
+         foreach (XmlNode node in xmlDoc.SelectSingleNode($@"/{mainNode}/{programsNode}").ChildNodes) {
             var program_name = node.InnerText;
             comboBoxListOfPrograms.Items.Add(program_name);
          }
@@ -291,7 +202,7 @@ namespace WindowsFormsTimer
 
       private void buttonAddNewProgram_Click(object sender, EventArgs e)
       {
-         var form2Dialog = new AddNewProgramForm(currentLanguage);
+         var form2Dialog = new AddNewProgramForm();
          var new_program_name = "";
 
          if (form2Dialog.ShowDialog(this) == DialogResult.OK) {
@@ -314,12 +225,12 @@ namespace WindowsFormsTimer
          var xmlDoc = new XmlDocument();
          xmlDoc.Load(SETUP_FILE);
 
-         var programs = xmlDoc.SelectSingleNode("//main//programs");
+         var programs = xmlDoc.SelectSingleNode($@"/{mainNode}/{programsNode}");
 
-         var program = xmlDoc.CreateElement("program");
+         var program = xmlDoc.CreateElement(programNode);
          program.InnerText = program_name;
 
-         program.SetAttribute("time", "000:00:00");
+         program.SetAttribute(timeAttr, "000:00:00");
 
          programs.AppendChild(program);
 
@@ -348,9 +259,9 @@ namespace WindowsFormsTimer
          var xmlDoc = new XmlDocument();
          xmlDoc.Load(SETUP_FILE);
 
-         foreach (XmlNode node in xmlDoc.SelectSingleNode("//main//programs").ChildNodes) {
+         foreach (XmlNode node in xmlDoc.SelectSingleNode($@"/{mainNode}/{programsNode}").ChildNodes) {
             if (node.InnerText == comboBoxListOfPrograms.SelectedItem.ToString()) {
-               node.Attributes["time"].InnerText = textBoxTimer.Text;
+               node.Attributes[timeAttr].InnerText = textBoxTimer.Text;
                break;
             }
          }
@@ -371,9 +282,6 @@ namespace WindowsFormsTimer
          var warningQuestion = "Enter valid time (Format \"XXX:XX:XX\")";
          var warningButton = "Ok";
 
-         switch (currentLanguage) {
-            case LanguageType.EN: { break; } // leave default values
-            case LanguageType.UA: {
                   questionText = "Ви усвідомлюєте, що ви коригуєте час вручну?";
                   questionTitle = "Підтвердження";
                   questionButtonYes = "Так";
@@ -383,14 +291,10 @@ namespace WindowsFormsTimer
                   warningTitle = "Увага!";
                   warningQuestion = "Введіть коректний час (Формат \"XXX:XX:XX\")";
                   warningButton = "Ок";
-                  break;
-               }
-            default: { break; } // leave default values
-         }
 
          // show confirm dialog form
          if (!correction) {
-            var confirm = new CorrectionConfirmForm(questionText, questionTitle, questionButtonYes, questionButtonNo, questionButtonCancel);
+            var confirm = new ConfirmForm(questionText, questionTitle, questionButtonYes, questionButtonNo, questionButtonCancel);
             if (confirm.ShowDialog() == DialogResult.Yes) {
                correction = true;
                EnableDisableButtons();
@@ -402,7 +306,7 @@ namespace WindowsFormsTimer
             EnableDisableButtons();
          } else // warning in case not valid time format
            {
-            var warningWindow = new CorrectionWarningForm(warningTitle, warningQuestion, warningButton);
+            var warningWindow = new WarningForm(warningTitle, warningQuestion, warningButton);
             warningWindow.ShowDialog();
          }
       }
@@ -430,9 +334,9 @@ namespace WindowsFormsTimer
          var xmlDoc = new XmlDocument();
          xmlDoc.Load(SETUP_FILE);
 
-         foreach (XmlNode node in xmlDoc.SelectSingleNode("//main//programs").ChildNodes) {
+         foreach (XmlNode node in xmlDoc.SelectSingleNode($@"/{mainNode}/{programsNode}").ChildNodes) {
             if (node.InnerText == comboBoxListOfPrograms.SelectedItem.ToString()) {
-               textBoxTimer.Text = (node.Attributes["time"] != null) ? node.Attributes["time"].InnerText : ""; ;
+               textBoxTimer.Text = (node.Attributes[timeAttr] != null) ? node.Attributes[timeAttr].InnerText : ""; ;
                break;
             }
          }
@@ -440,7 +344,6 @@ namespace WindowsFormsTimer
 
       private void EnableDisableButtons()
       {
-         TranslateForm();
          if (correction) {
             textBoxTimer.Enabled = true;
             buttonStart.Enabled = false;

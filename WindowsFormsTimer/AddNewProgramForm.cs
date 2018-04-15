@@ -7,30 +7,16 @@ namespace WindowsFormsTimer
     {
         public string program_name = "";
 
-        public AddNewProgramForm(LanguageType language)
+        public AddNewProgramForm()
         {
             InitializeComponent();
-            TranslateFormControls(language);
+            TranslateFormControls();
         }
 
-        private void TranslateFormControls(LanguageType language)
+        private void TranslateFormControls()
         {
-          switch (language)
-          {
-            case LanguageType.UA:
-              {
                 Text = "Нова програма";
                 buttonAdd.Text = "Додати";
-                break;
-              }
-            case LanguageType.EN:
-            default:
-              {
-                Text = "New Program";
-                buttonAdd.Text = "Add";
-                break;
-              }
-          }
         }
 
         private void buttonAdd_Click(object sender, EventArgs e)

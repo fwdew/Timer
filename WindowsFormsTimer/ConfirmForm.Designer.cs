@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsTimer
 {
-  partial class CorrectionConfirmForm
+  partial class ConfirmForm
   {
     /// <summary>
     /// Required designer variable.

@@ -3,9 +3,9 @@ using System.Windows.Forms;
 
 namespace WindowsFormsTimer
 {
-  public partial class CorrectionConfirmForm : Form
+  public partial class ConfirmForm : Form
   {
-    public CorrectionConfirmForm(string text, string title, string yes, string no, string cancel)
+    public ConfirmForm(string text, string title, string yes, string no, string cancel)
     {
       InitializeComponent();
       Text = title;

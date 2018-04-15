@@ -3,9 +3,9 @@ using System.Windows.Forms;
 
 namespace WindowsFormsTimer
 {
-  public partial class CorrectionWarningForm : Form
+  public partial class WarningForm : Form
   {
-    public CorrectionWarningForm(string title, string warning, string button)
+    public WarningForm(string title, string warning, string button)
     {
       InitializeComponent();
       Text = title;
