@@ -13,8 +13,9 @@ namespace WindowsFormsTimer
       const string programsNode = "programs";
       const string programNode = "program";
       const string timeAttr = "time";
+      const string TIME_SEPARATOR = ":";
+      const string TIME_FORMAT = "000:00:00";
 
-      private const string TIME_SEPARATOR = ":";
       private static string[] time_separators = { TIME_SEPARATOR };
       private bool correction = false;
 
@@ -23,38 +24,40 @@ namespace WindowsFormsTimer
       {
          InitializeComponent();
          ConfigureForm();
+      }
+
+      private void ConfigureForm()
+      {
+         PopulateProgramList();
+
+         CreateMenu();
+
+         buttonStart.Enabled = false;
+         buttonStop.Enabled = false;
+         buttonCorrectTime.Enabled = false;
 
          // update stop events
          SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged; // to intercept hibernate event
          SystemEvents.SessionEnded += SystemEvents_Power; // to intercept shutdown event
       }
 
-      private void ConfigureForm()
-      {
-
-         ReadingConfigurationFromXml();
-
-         buttonStart.Enabled = false;
-         buttonStop.Enabled = false;
-         buttonCorrectTime.Enabled = false;
-
-         CreateMenu();
-      }
-
-      private void ReadingConfigurationFromXml()
+      private void PopulateProgramList()
       {
          if (!File.Exists(SETUP_FILE)) {
             CreateBlankConfigurationFile();
          }
-         FormingComboBoxListOfPrograms();
+         GetProgramList();
       }
 
       private void CreateBlankConfigurationFile()
       {
          /*
-         <?xml version=1.0 encoding=utf-8?>");
-         <language>en</language>
-         <programs></programs>
+         Create empty file with following structure
+         <?xml version=1.0 encoding=utf-8?>
+         <main>
+            <programs>
+            </programs>
+         </main>
          */
          using (var xmlWriter = XmlWriter.Create(SETUP_FILE)) {
             xmlWriter.WriteStartDocument();
@@ -67,27 +70,19 @@ namespace WindowsFormsTimer
             xmlWriter.WriteEndDocument();
          }
       }
-      #endregion
 
-      #region Events
-      private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+      private void GetProgramList()
       {
-         Stop();
-      }
+         var xmlDoc = new XmlDocument();
+         xmlDoc.Load(SETUP_FILE);
 
-      private void SystemEvents_Power(object sender, SessionEndedEventArgs e)
-      {
-         Stop();
-      }
-      #endregion
+         comboBoxListOfPrograms.Items.Clear();
 
-      private void SetUkrainianLanguage()
-      {
-         buttonStart.Text = "Старт";
-         buttonStop.Text = "Стоп";
-         buttonAddNewProgram.Text = "Додати програму";
-         buttonCorrectTime.Text = (!correction) ? "Скорегувати час" : "Записати";
-         Text = "Таймер";
+         // read data from each node "program" and fill combobox
+         foreach (XmlNode node in xmlDoc.SelectSingleNode($@"/{mainNode}/{programsNode}").ChildNodes) {
+            var program_name = node.InnerText;
+            comboBoxListOfPrograms.Items.Add(program_name);
+         }
       }
 
       #region Menu
@@ -111,12 +106,12 @@ namespace WindowsFormsTimer
          // TODO:
          var menuItemAbout1 = new MenuItem("someText");
 
-                  topMenuItemFile.Text = "&Файл";
-                  menuItemNew.Text = "&Нова";
-                  menuItemExit.Text = "В&ихід";
+         topMenuItemFile.Text = "&Файл";
+         menuItemNew.Text = "&Нова";
+         menuItemExit.Text = "В&ихід";
 
-                  topMenuItemHelp.Text = "&Допомога";
-                  menuItemAbout.Text = "&Про програму";
+         topMenuItemHelp.Text = "&Допомога";
+         menuItemAbout.Text = "&Про програму";
 
          topMenuItemFile.MenuItems.Add(menuItemNew);
          topMenuItemFile.MenuItems.Add(menuItemExit);
@@ -149,25 +144,29 @@ namespace WindowsFormsTimer
       }
       #endregion
 
+      #region Events
+      private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+      {
+         Stop();
+      }
+
+      private void SystemEvents_Power(object sender, SessionEndedEventArgs e)
+      {
+         Stop();
+      }
+      #endregion
+      #endregion
+
+      // TODO:
+      private void SetUkrainianLanguage()
+      {
+         buttonCorrectTime.Text = (!correction) ? "Скорегувати час" : "Записати";
+      }
+
       private void StopRunningTimer(object sender, EventArgs e)
       {
          if ((comboBoxListOfPrograms.SelectedItem != null) && !correction) {
             Stop();
-         }
-      }
-
-      // take a list programs from the setup file
-      private void FormingComboBoxListOfPrograms()
-      {
-         var xmlDoc = new XmlDocument();
-         xmlDoc.Load(SETUP_FILE);
-
-         comboBoxListOfPrograms.Items.Clear();
-
-         // read data from each node "program" and fill combobox
-         foreach (XmlNode node in xmlDoc.SelectSingleNode($@"/{mainNode}/{programsNode}").ChildNodes) {
-            var program_name = node.InnerText;
-            comboBoxListOfPrograms.Items.Add(program_name);
          }
       }
 
@@ -181,6 +180,7 @@ namespace WindowsFormsTimer
          comboBoxListOfPrograms.Enabled = false;
       }
 
+      // TODO:
       private void timer_Tick(object Sender, EventArgs e)
       {
          var time = textBoxTimer.Text.Split(time_separators, StringSplitOptions.None);
@@ -202,25 +202,25 @@ namespace WindowsFormsTimer
 
       private void buttonAddNewProgram_Click(object sender, EventArgs e)
       {
-         var form2Dialog = new AddNewProgramForm();
+         var addNewProgramForm = new AddNewProgramForm();
          var new_program_name = "";
 
-         if (form2Dialog.ShowDialog(this) == DialogResult.OK) {
-            new_program_name = form2Dialog.program_name;
+         if (addNewProgramForm.ShowDialog(this) == DialogResult.OK) {
+            new_program_name = addNewProgramForm.programName;
          }
 
-         form2Dialog.Dispose();
+         addNewProgramForm.Dispose();
 
          if (new_program_name != "") {
             if (!comboBoxListOfPrograms.Items.Contains(new_program_name)) {
                comboBoxListOfPrograms.Items.Add(new_program_name);
-               AddNewProgramNameToXmlFile(new_program_name);
+               UpdateXmlFile(new_program_name);
                comboBoxListOfPrograms.SelectedItem = new_program_name;
             }
          }
       }
 
-      private static void AddNewProgramNameToXmlFile(string program_name)
+      private static void UpdateXmlFile(string programName)
       {
          var xmlDoc = new XmlDocument();
          xmlDoc.Load(SETUP_FILE);
@@ -228,10 +228,8 @@ namespace WindowsFormsTimer
          var programs = xmlDoc.SelectSingleNode($@"/{mainNode}/{programsNode}");
 
          var program = xmlDoc.CreateElement(programNode);
-         program.InnerText = program_name;
-
-         program.SetAttribute(timeAttr, "000:00:00");
-
+         program.InnerText = programName;
+         program.SetAttribute(timeAttr, TIME_FORMAT);
          programs.AppendChild(program);
 
          xmlDoc.Save(SETUP_FILE);
@@ -245,23 +243,26 @@ namespace WindowsFormsTimer
       // TODO: Rename
       private void Stop()
       {
-         buttonStart.Enabled = true;
-         buttonStop.Enabled = false;
-         timer.Enabled = false;
-         buttonCorrectTime.Enabled = true;
-         buttonAddNewProgram.Enabled = true;
-         comboBoxListOfPrograms.Enabled = true;
-         SaveTimeToFile();
+         buttonStart.Enabled
+            = buttonCorrectTime.Enabled
+            = buttonAddNewProgram.Enabled
+            = comboBoxListOfPrograms.Enabled
+            = true;
+         buttonStop.Enabled
+            = timer.Enabled
+            = false;
+
+         UpdateProgramTime(comboBoxListOfPrograms.SelectedItem.ToString(), textBoxTimer.Text);
       }
 
-      private void SaveTimeToFile()
+      private void UpdateProgramTime(string programName, string time)
       {
          var xmlDoc = new XmlDocument();
          xmlDoc.Load(SETUP_FILE);
 
          foreach (XmlNode node in xmlDoc.SelectSingleNode($@"/{mainNode}/{programsNode}").ChildNodes) {
-            if (node.InnerText == comboBoxListOfPrograms.SelectedItem.ToString()) {
-               node.Attributes[timeAttr].InnerText = textBoxTimer.Text;
+            if (node.InnerText == programName) {
+               node.Attributes[timeAttr].InnerText = time;
                break;
             }
          }
@@ -271,43 +272,17 @@ namespace WindowsFormsTimer
 
       private void buttonCorrectTime_Click(object sender, EventArgs e)
       {
-         // set messagebox texts in current language
-         var questionText = "Do you realize that you correct time manually?";
-         var questionTitle = "Confirm";
-         var questionButtonYes = "Yes";
-         var questionButtonNo = "No";
-         var questionButtonCancel = "Cancel";
-
-         var warningTitle = "Warning!";
-         var warningQuestion = "Enter valid time (Format \"XXX:XX:XX\")";
-         var warningButton = "Ok";
-
-                  questionText = "Ви усвідомлюєте, що ви коригуєте час вручну?";
-                  questionTitle = "Підтвердження";
-                  questionButtonYes = "Так";
-                  questionButtonNo = "Ні";
-                  questionButtonCancel = "Відмінити";
-
-                  warningTitle = "Увага!";
-                  warningQuestion = "Введіть коректний час (Формат \"XXX:XX:XX\")";
-                  warningButton = "Ок";
-
-         // show confirm dialog form
          if (!correction) {
-            var confirm = new ConfirmForm(questionText, questionTitle, questionButtonYes, questionButtonNo, questionButtonCancel);
-            if (confirm.ShowDialog() == DialogResult.Yes) {
+            if (new ConfirmForm().ShowDialog() == DialogResult.Yes) {
                correction = true;
                EnableDisableButtons();
             }
-         } else if (CorrectTime()) // save only in correct time
-           {
+         } else if (CorrectTime()) {
             correction = false;
-            SaveTimeToFile();
+            UpdateProgramTime(comboBoxListOfPrograms.SelectedItem.ToString(), textBoxTimer.Text);
             EnableDisableButtons();
-         } else // warning in case not valid time format
-           {
-            var warningWindow = new WarningForm(warningTitle, warningQuestion, warningButton);
-            warningWindow.ShowDialog();
+         } else {
+            MessageBox.Show("Введіть коректний час (Формат \"XXX: XX:XX\")", "Увага!");
          }
       }
 
@@ -319,27 +294,33 @@ namespace WindowsFormsTimer
             var seconds = Convert.ToInt32(time[2]);
             var minutes = Convert.ToInt32(time[1]);
             var hours = Convert.ToInt32(time[0]);
-            if ((seconds >= 0) && (seconds <= 59) && (minutes >= 0) && (minutes <= 59) && (hours >= 0) && (hours <= 999)) { return true; } else { return false; }
+
+            return seconds >= 0
+               && seconds <= 59
+               && minutes >= 0
+               && minutes <= 59
+               && hours >= 0
+               && hours <= 999;
          }
          catch (Exception) {
             return false;
          }
       }
 
-      private void comboBoxcomboBoxListOfPrograms_SelectedIndexChanged(object sender, EventArgs e)
+      private void comboBoxListOfPrograms_SelectedIndexChanged(object sender, EventArgs e)
       {
-         buttonStart.Enabled = true;
-         buttonCorrectTime.Enabled = true;
-
          var xmlDoc = new XmlDocument();
          xmlDoc.Load(SETUP_FILE);
 
          foreach (XmlNode node in xmlDoc.SelectSingleNode($@"/{mainNode}/{programsNode}").ChildNodes) {
             if (node.InnerText == comboBoxListOfPrograms.SelectedItem.ToString()) {
-               textBoxTimer.Text = (node.Attributes[timeAttr] != null) ? node.Attributes[timeAttr].InnerText : ""; ;
+               textBoxTimer.Text = node.Attributes[timeAttr].InnerText;
                break;
             }
          }
+
+         buttonStart.Enabled = true;
+         buttonCorrectTime.Enabled = true;
       }
 
       private void EnableDisableButtons()

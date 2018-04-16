@@ -45,7 +45,7 @@
          this.buttonStart.Name = "buttonStart";
          this.buttonStart.Size = new System.Drawing.Size(171, 32);
          this.buttonStart.TabIndex = 0;
-         this.buttonStart.Text = "Start";
+         this.buttonStart.Text = "Старт";
          this.buttonStart.UseVisualStyleBackColor = true;
          this.buttonStart.Click += new System.EventHandler(this.buttonStart_Click);
          // 
@@ -66,7 +66,7 @@
          this.buttonStop.Name = "buttonStop";
          this.buttonStop.Size = new System.Drawing.Size(171, 32);
          this.buttonStop.TabIndex = 1;
-         this.buttonStop.Text = "Stop";
+         this.buttonStop.Text = "Стоп";
          this.buttonStop.UseVisualStyleBackColor = true;
          this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
          // 
@@ -79,7 +79,7 @@
          this.comboBoxListOfPrograms.Name = "comboBoxListOfPrograms";
          this.comboBoxListOfPrograms.Size = new System.Drawing.Size(150, 32);
          this.comboBoxListOfPrograms.TabIndex = 5;
-         this.comboBoxListOfPrograms.SelectedIndexChanged += new System.EventHandler(this.comboBoxcomboBoxListOfPrograms_SelectedIndexChanged);
+         this.comboBoxListOfPrograms.SelectedIndexChanged += new System.EventHandler(this.comboBoxListOfPrograms_SelectedIndexChanged);
          // 
          // buttonAddNewProgram
          // 
@@ -88,7 +88,7 @@
          this.buttonAddNewProgram.Name = "buttonAddNewProgram";
          this.buttonAddNewProgram.Size = new System.Drawing.Size(61, 41);
          this.buttonAddNewProgram.TabIndex = 6;
-         this.buttonAddNewProgram.Text = "Add new program";
+         this.buttonAddNewProgram.Text = "Додати програму";
          this.buttonAddNewProgram.UseVisualStyleBackColor = true;
          this.buttonAddNewProgram.Click += new System.EventHandler(this.buttonAddNewProgram_Click);
          // 
@@ -104,7 +104,7 @@
          this.buttonCorrectTime.Name = "buttonCorrectTime";
          this.buttonCorrectTime.Size = new System.Drawing.Size(73, 41);
          this.buttonCorrectTime.TabIndex = 7;
-         this.buttonCorrectTime.Text = "Correct time";
+         this.buttonCorrectTime.Text = "Скорегувати час";
          this.buttonCorrectTime.UseVisualStyleBackColor = true;
          this.buttonCorrectTime.Click += new System.EventHandler(this.buttonCorrectTime_Click);
          // 
@@ -134,7 +134,7 @@
          this.MaximizeBox = false;
          this.Name = "TimerForm";
          this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-         this.Text = "Timer";
+         this.Text = "Таймер";
          this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.StopRunningTimer);
          this.ResumeLayout(false);
          this.PerformLayout();
