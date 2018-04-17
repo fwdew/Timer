@@ -29,25 +29,23 @@
         private void InitializeComponent()
         {
          this.components = new System.ComponentModel.Container();
-         this.buttonStart = new System.Windows.Forms.Button();
+         this.buttonStartStop = new System.Windows.Forms.Button();
          this.textBoxTimer = new System.Windows.Forms.TextBox();
-         this.buttonStop = new System.Windows.Forms.Button();
          this.comboBoxListOfPrograms = new System.Windows.Forms.ComboBox();
          this.buttonAddNewProgram = new System.Windows.Forms.Button();
          this.timer = new System.Windows.Forms.Timer(this.components);
          this.buttonCorrectTime = new System.Windows.Forms.Button();
-         this.button1 = new System.Windows.Forms.Button();
          this.SuspendLayout();
          // 
-         // buttonStart
+         // buttonStartStop
          // 
-         this.buttonStart.Location = new System.Drawing.Point(12, 71);
-         this.buttonStart.Name = "buttonStart";
-         this.buttonStart.Size = new System.Drawing.Size(171, 32);
-         this.buttonStart.TabIndex = 0;
-         this.buttonStart.Text = "Старт";
-         this.buttonStart.UseVisualStyleBackColor = true;
-         this.buttonStart.Click += new System.EventHandler(this.buttonStart_Click);
+         this.buttonStartStop.Location = new System.Drawing.Point(12, 69);
+         this.buttonStartStop.Name = "buttonStartStop";
+         this.buttonStartStop.Size = new System.Drawing.Size(171, 33);
+         this.buttonStartStop.TabIndex = 0;
+         this.buttonStartStop.Text = "Старт";
+         this.buttonStartStop.UseVisualStyleBackColor = true;
+         this.buttonStartStop.Click += new System.EventHandler(this.buttonStart_Click);
          // 
          // textBoxTimer
          // 
@@ -59,16 +57,6 @@
          this.textBoxTimer.TabIndex = 4;
          this.textBoxTimer.Text = "000:00:00";
          this.textBoxTimer.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-         // 
-         // buttonStop
-         // 
-         this.buttonStop.Location = new System.Drawing.Point(12, 109);
-         this.buttonStop.Name = "buttonStop";
-         this.buttonStop.Size = new System.Drawing.Size(171, 32);
-         this.buttonStop.TabIndex = 1;
-         this.buttonStop.Text = "Стоп";
-         this.buttonStop.UseVisualStyleBackColor = true;
-         this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
          // 
          // comboBoxListOfPrograms
          // 
@@ -108,34 +96,22 @@
          this.buttonCorrectTime.UseVisualStyleBackColor = true;
          this.buttonCorrectTime.Click += new System.EventHandler(this.buttonCorrectTime_Click);
          // 
-         // button1
-         // 
-         this.button1.Location = new System.Drawing.Point(202, 108);
-         this.button1.Name = "button1";
-         this.button1.Size = new System.Drawing.Size(75, 23);
-         this.button1.TabIndex = 8;
-         this.button1.Text = "button1";
-         this.button1.UseVisualStyleBackColor = true;
-         this.button1.Click += new System.EventHandler(this.button1_Click);
-         // 
          // TimerForm
          // 
          this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
          this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-         this.ClientSize = new System.Drawing.Size(368, 150);
-         this.Controls.Add(this.button1);
+         this.ClientSize = new System.Drawing.Size(368, 113);
          this.Controls.Add(this.buttonCorrectTime);
          this.Controls.Add(this.buttonAddNewProgram);
          this.Controls.Add(this.comboBoxListOfPrograms);
-         this.Controls.Add(this.buttonStop);
          this.Controls.Add(this.textBoxTimer);
-         this.Controls.Add(this.buttonStart);
+         this.Controls.Add(this.buttonStartStop);
          this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
          this.MaximizeBox = false;
          this.Name = "TimerForm";
          this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
          this.Text = "Таймер";
-         this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.StopRunningTimer);
+         this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.TimerForm_FormClosing);
          this.ResumeLayout(false);
          this.PerformLayout();
 
@@ -143,14 +119,12 @@
 
         #endregion
 
-        private System.Windows.Forms.Button buttonStart;
+        private System.Windows.Forms.Button buttonStartStop;
         private System.Windows.Forms.TextBox textBoxTimer;
-        private System.Windows.Forms.Button buttonStop;
         private System.Windows.Forms.ComboBox comboBoxListOfPrograms;
         private System.Windows.Forms.Button buttonAddNewProgram;
         private System.Windows.Forms.Timer timer;
         private System.Windows.Forms.Button buttonCorrectTime;
-      private System.Windows.Forms.Button button1;
    }
 }
 

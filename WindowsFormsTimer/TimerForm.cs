@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 using System.Xml;
@@ -13,11 +14,13 @@ namespace WindowsFormsTimer
       const string programsNode = "programs";
       const string programNode = "program";
       const string timeAttr = "time";
-      const string TIME_SEPARATOR = ":";
       const string TIME_FORMAT = "000:00:00";
 
-      private static string[] time_separators = { TIME_SEPARATOR };
+      private static string[] timeSeparators = { ":" };
       private bool correction = false;
+
+      private TimeSpan timeSpan = new TimeSpan();
+      private Stopwatch stopwatch = new Stopwatch();
 
       #region Constructors
       public TimerForm()
@@ -32,8 +35,7 @@ namespace WindowsFormsTimer
 
          CreateMenu();
 
-         buttonStart.Enabled = false;
-         buttonStop.Enabled = false;
+         buttonStartStop.Enabled = false;
          buttonCorrectTime.Enabled = false;
 
          // update stop events
@@ -88,63 +90,35 @@ namespace WindowsFormsTimer
       #region Menu
       private void CreateMenu()
       {
-         /* Create menu items in current structure.
-         Menu
-            File
-               New
-               Exit
-            Help
-               About
-         */
-
          var mainMenu = new MainMenu();
-         var topMenuItemFile = new MenuItem();
-         var menuItemNew = new MenuItem();
-         var menuItemExit = new MenuItem();
-         var topMenuItemHelp = new MenuItem();
-         var menuItemAbout = new MenuItem();
-         // TODO:
-         var menuItemAbout1 = new MenuItem("someText");
-
-         topMenuItemFile.Text = "&Файл";
-         menuItemNew.Text = "&Нова";
-         menuItemExit.Text = "В&ихід";
-
-         topMenuItemHelp.Text = "&Допомога";
-         menuItemAbout.Text = "&Про програму";
+         var topMenuItemFile = new MenuItem("Файл");
+         var menuItemNew = new MenuItem("Нова програма");
+         var menuItemExit = new MenuItem("Вихід");
 
          topMenuItemFile.MenuItems.Add(menuItemNew);
          topMenuItemFile.MenuItems.Add(menuItemExit);
          mainMenu.MenuItems.Add(topMenuItemFile);
 
-         topMenuItemHelp.MenuItems.Add(menuItemAbout);
-         topMenuItemHelp.MenuItems.Add(menuItemAbout1);
-         mainMenu.MenuItems.Add(topMenuItemHelp);
-
          menuItemNew.Click += new EventHandler(menuItemNew_Click);
          menuItemExit.Click += new EventHandler(menuItemExit_Click);
-         menuItemAbout.Click += new EventHandler(menuItemAbout_Click);
 
          Menu = mainMenu;
       }
 
       private void menuItemNew_Click(object sender, EventArgs e)
       {
-         StopRunningTimer(this, EventArgs.Empty);
+         Stop();
          buttonAddNewProgram_Click(this, EventArgs.Empty);
       }
+
       private void menuItemExit_Click(object sender, EventArgs e)
       {
-         StopRunningTimer(this, EventArgs.Empty);
+         Stop();
          Close();
-      }
-      private void menuItemAbout_Click(object sender, EventArgs e)
-      {
-         new AboutBoxForm().ShowDialog();
       }
       #endregion
 
-      #region Events
+      #region Shutdown events
       private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
       {
          Stop();
@@ -154,72 +128,17 @@ namespace WindowsFormsTimer
       {
          Stop();
       }
-      #endregion
-      #endregion
 
-      // TODO:
-      private void SetUkrainianLanguage()
-      {
-         buttonCorrectTime.Text = (!correction) ? "Скорегувати час" : "Записати";
-      }
-
-      private void StopRunningTimer(object sender, EventArgs e)
+      private void TimerForm_FormClosing(object sender, FormClosingEventArgs e)
       {
          if ((comboBoxListOfPrograms.SelectedItem != null) && !correction) {
             Stop();
          }
       }
+      #endregion
+      #endregion
 
-      private void buttonStart_Click(object sender, EventArgs e)
-      {
-         timer.Enabled = true;
-         buttonStart.Enabled = false;
-         buttonStop.Enabled = true;
-         buttonCorrectTime.Enabled = false;
-         buttonAddNewProgram.Enabled = false;
-         comboBoxListOfPrograms.Enabled = false;
-      }
-
-      // TODO:
-      private void timer_Tick(object Sender, EventArgs e)
-      {
-         var time = textBoxTimer.Text.Split(time_separators, StringSplitOptions.None);
-         var seconds = Convert.ToInt32(time[2]) + 1;
-         var minutes = Convert.ToInt32(time[1]);
-         var hours = Convert.ToInt32(time[0]);
-
-         if (seconds == 60) {
-            seconds = 0;
-            minutes += 1;
-            if (minutes == 60) {
-               minutes = 0;
-               hours += 1;
-            }
-         }
-
-         textBoxTimer.Text = hours.ToString("000") + TIME_SEPARATOR + minutes.ToString("00") + TIME_SEPARATOR + seconds.ToString("00");
-      }
-
-      private void buttonAddNewProgram_Click(object sender, EventArgs e)
-      {
-         var addNewProgramForm = new AddNewProgramForm();
-         var new_program_name = "";
-
-         if (addNewProgramForm.ShowDialog(this) == DialogResult.OK) {
-            new_program_name = addNewProgramForm.programName;
-         }
-
-         addNewProgramForm.Dispose();
-
-         if (new_program_name != "") {
-            if (!comboBoxListOfPrograms.Items.Contains(new_program_name)) {
-               comboBoxListOfPrograms.Items.Add(new_program_name);
-               UpdateXmlFile(new_program_name);
-               comboBoxListOfPrograms.SelectedItem = new_program_name;
-            }
-         }
-      }
-
+      #region Work with xml
       private static void UpdateXmlFile(string programName)
       {
          var xmlDoc = new XmlDocument();
@@ -233,26 +152,6 @@ namespace WindowsFormsTimer
          programs.AppendChild(program);
 
          xmlDoc.Save(SETUP_FILE);
-      }
-
-      private void buttonStop_Click(object sender, EventArgs e)
-      {
-         Stop();
-      }
-
-      // TODO: Rename
-      private void Stop()
-      {
-         buttonStart.Enabled
-            = buttonCorrectTime.Enabled
-            = buttonAddNewProgram.Enabled
-            = comboBoxListOfPrograms.Enabled
-            = true;
-         buttonStop.Enabled
-            = timer.Enabled
-            = false;
-
-         UpdateProgramTime(comboBoxListOfPrograms.SelectedItem.ToString(), textBoxTimer.Text);
       }
 
       private void UpdateProgramTime(string programName, string time)
@@ -269,43 +168,53 @@ namespace WindowsFormsTimer
 
          xmlDoc.Save(SETUP_FILE);
       }
+      #endregion
+
+      #region Button events
+      private void buttonStart_Click(object sender, EventArgs e)
+      {
+         if (buttonStartStop.Text == "Старт") {
+            buttonStartStop.Text = "Стоп";
+            Start();
+         } else {
+            buttonStartStop.Text = "Старт";
+            Stop();
+         }
+      }
 
       private void buttonCorrectTime_Click(object sender, EventArgs e)
       {
          if (!correction) {
             if (new ConfirmForm().ShowDialog() == DialogResult.Yes) {
                correction = true;
-               EnableDisableButtons();
+               EnableManualCorrection();
             }
-         } else if (CorrectTime()) {
+         } else if (CheckTimeFormat()) {
             correction = false;
             UpdateProgramTime(comboBoxListOfPrograms.SelectedItem.ToString(), textBoxTimer.Text);
-            EnableDisableButtons();
+            EnableManualCorrection();
          } else {
             MessageBox.Show("Введіть коректний час (Формат \"XXX: XX:XX\")", "Увага!");
          }
       }
 
-      // to correct time manually
-      private bool CorrectTime()
+      private void buttonAddNewProgram_Click(object sender, EventArgs e)
       {
-         var time = textBoxTimer.Text.Split(time_separators, StringSplitOptions.None);
-         try {
-            var seconds = Convert.ToInt32(time[2]);
-            var minutes = Convert.ToInt32(time[1]);
-            var hours = Convert.ToInt32(time[0]);
+         var addNewProgramForm = new AddNewProgramForm();
 
-            return seconds >= 0
-               && seconds <= 59
-               && minutes >= 0
-               && minutes <= 59
-               && hours >= 0
-               && hours <= 999;
+         if (addNewProgramForm.ShowDialog(this) == DialogResult.OK) {
+            var newProgramName = addNewProgramForm.programName;
+
+            if (!string.IsNullOrEmpty(newProgramName)
+               && !comboBoxListOfPrograms.Items.Contains(newProgramName)) {
+               comboBoxListOfPrograms.Items.Add(newProgramName);
+               comboBoxListOfPrograms.SelectedItem = newProgramName;
+               UpdateXmlFile(newProgramName);
+            }
          }
-         catch (Exception) {
-            return false;
-         }
+         addNewProgramForm.Dispose();
       }
+      #endregion
 
       private void comboBoxListOfPrograms_SelectedIndexChanged(object sender, EventArgs e)
       {
@@ -314,40 +223,87 @@ namespace WindowsFormsTimer
 
          foreach (XmlNode node in xmlDoc.SelectSingleNode($@"/{mainNode}/{programsNode}").ChildNodes) {
             if (node.InnerText == comboBoxListOfPrograms.SelectedItem.ToString()) {
-               textBoxTimer.Text = node.Attributes[timeAttr].InnerText;
+               var time = node.Attributes[timeAttr].InnerText.Split(timeSeparators, StringSplitOptions.None);
+               var hours = Convert.ToInt32(time[0]);
+               var minutes = Convert.ToInt32(time[1]);
+               var seconds = Convert.ToInt32(time[2]);
+
+               timeSpan = new TimeSpan(hours, minutes, seconds);
+               UpdateTimerTextBox(timeSpan);
                break;
             }
          }
 
-         buttonStart.Enabled = true;
+         buttonStartStop.Enabled = true;
          buttonCorrectTime.Enabled = true;
       }
 
-      private void EnableDisableButtons()
+      private void Start()
       {
-         if (correction) {
-            textBoxTimer.Enabled = true;
-            buttonStart.Enabled = false;
-            buttonAddNewProgram.Enabled = false;
-            comboBoxListOfPrograms.Enabled = false;
-         } else {
-            textBoxTimer.Enabled = false;
-            buttonStart.Enabled = true;
-            buttonAddNewProgram.Enabled = true;
-            comboBoxListOfPrograms.Enabled = true;
+         stopwatch.Reset();
+         stopwatch.Start();
+
+         timer.Enabled = true;
+         textBoxTimer.Enabled
+            = buttonCorrectTime.Enabled
+            = buttonAddNewProgram.Enabled
+            = comboBoxListOfPrograms.Enabled
+            = false;
+      }
+
+      private void Stop()
+      {
+         timeSpan += stopwatch.Elapsed;
+         stopwatch.Stop();
+
+         buttonCorrectTime.Enabled
+            = buttonAddNewProgram.Enabled
+            = comboBoxListOfPrograms.Enabled
+            = true;
+         timer.Enabled
+            = false;
+
+         UpdateProgramTime(comboBoxListOfPrograms.SelectedItem.ToString(), textBoxTimer.Text);
+      }
+
+      private void timer_Tick(object Sender, EventArgs e)
+      {
+         UpdateTimerTextBox(timeSpan.Add(stopwatch.Elapsed));
+      }
+
+      private void UpdateTimerTextBox(TimeSpan time)
+      {
+         textBoxTimer.Text = $"{time.Hours:000}:{time.Minutes:00}:{time.Seconds:00}";
+      }
+
+      private bool CheckTimeFormat()
+      {
+         var time = textBoxTimer.Text.Split(timeSeparators, StringSplitOptions.None);
+         try {
+            var hours = Convert.ToInt32(time[0]);
+            var minutes = Convert.ToInt32(time[1]);
+            var seconds = Convert.ToInt32(time[2]);
+
+            return seconds >= 0
+               && seconds <= 59
+               && minutes >= 0
+               && minutes <= 59
+               && hours >= 0
+               && hours <= 999;
+         }
+         catch {
+            return false;
          }
       }
 
-      // TODO:
-      private void button1_Click(object sender, EventArgs e)
+      private void EnableManualCorrection()
       {
-         foreach (var item in Menu.MenuItems) {
-            var mItem = (MenuItem)item;
-            MessageBox.Show(mItem.Text);
-            if (mItem.Text == "&Help") {
-               mItem.Text = "111";
-            }
-         }
+         textBoxTimer.Enabled = correction;
+         buttonStartStop.Enabled
+            = buttonAddNewProgram.Enabled
+            = comboBoxListOfPrograms.Enabled
+            = !correction;
+         buttonCorrectTime.Text = (correction) ? "Записати" : "Скорегувати час";
       }
    }
 }

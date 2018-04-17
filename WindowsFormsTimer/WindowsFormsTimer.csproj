@@ -56,12 +56,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AboutBoxForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AboutBoxForm.Designer.cs">
-      <DependentUpon>AboutBoxForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="ConfirmForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -82,9 +76,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="AboutBoxForm.resx">
-      <DependentUpon>AboutBoxForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="ConfirmForm.resx">
       <DependentUpon>ConfirmForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -138,9 +129,6 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="setup_timers.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
